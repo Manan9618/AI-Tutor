@@ -1,0 +1,20 @@
+[
+    {
+        "topic": "Machine Learning",
+        "level": "intermediate",
+        "questions": [
+            {
+                "id": 1,
+                "question": "What is overfitting in a model?",
+                "choices": [
+                    "A. When a model performs well on unseen data",
+                    "B. When a model fits training data too closely",
+                    "C. When data has missing values",
+                    "D. When model has too few parameters"
+                ],
+                "answer": 1,
+                "explanation": "Overfitting happens when a model learns noise from training data, reducing its generalization ability."
+            }
+        ]
+    }
+]

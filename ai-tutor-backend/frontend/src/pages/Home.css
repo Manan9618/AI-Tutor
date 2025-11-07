@@ -1,0 +1,362 @@
+/* ================================
+   AI Tutor Dashboard - Home.css
+   ================================ */
+
+/* Root Page */
+.home-page {
+  padding: 2rem 1rem;
+  margin: 0;
+  background: #ffffff;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 100%;
+}
+
+/* ================================
+   Welcome Banner
+   ================================ */
+.welcome-banner {
+  background: #e5e7eb;
+  color: #4b5563;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-banner span {
+  margin-right: 0.5rem;
+}
+
+/* ================================
+   Page Title
+   ================================ */
+.page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.page-subtitle {
+  font-size: 1.1rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+/* ================================
+   Module Cards Grid
+   ================================ */
+.module-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Always 4 equal columns */
+  gap: 1.5rem;
+  width: 100%;
+  margin: 0 auto 3rem;
+  max-width: 100%; /* Remove restriction */
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+/* Base Card Styling */
+.module-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  width: 100%; /* Ensure full use of grid cell width */
+}
+
+/* Hover effect */
+.module-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* Card Icon Wrapper */
+.card-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  backdrop-filter: blur(4px);
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+/* Card Text */
+.module-card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  font-size: 1.6rem;
+}
+
+.module-card p {
+  font-size: 0.95rem;
+  opacity: 0.95;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+  flex: 1;
+  font-size: 1rem;
+}
+
+.get-started {
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.2s ease;
+  font-size: 1rem;
+}
+
+.module-card:hover .get-started {
+  transform: translateX(6px);
+}
+
+/* ================================
+   Gradient Color Variants
+   ================================ */
+
+/* Use !important only to override browser default link background */
+.chat-card {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+.module-card.explanation-card {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+.learning-path-card {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+}
+
+.analytics-card {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+}
+
+/* ================================
+   Stats Cards
+   ================================ */
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.8rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.stat-card h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.4rem;
+}
+
+.stat-card p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ================================
+   Continue Learning Section
+   ================================ */
+.continue-learning-section {
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.continue-learning-section h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.continue-card {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.continue-icon {
+  font-size: 2rem;
+  width: 56px;
+  height: 56px;
+  background: #f3f4f6;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.continue-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.continue-content p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.continue-btn {
+  background: #111827;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  transition: all 0.2s ease;
+}
+
+.continue-btn:hover {
+  background: #1f2937;
+  transform: scale(1.05);
+}
+
+/* ================================
+   Loading & Error States
+   ================================ */
+.loading,
+.error-message {
+  text-align: center;
+  font-size: 1.1rem;
+  padding: 3rem 1rem;
+  color: #4b5563;
+}
+
+/* ================================
+   Responsive Design
+   ================================ */
+@media (max-width: 1200px) {
+  .home-page {
+    padding: 2rem 1rem;
+  }
+  .module-cards-grid,
+  .stats-cards-grid,
+  .continue-learning-section {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  .module-card {
+    min-height: 250px;
+  }
+  .module-cards-grid {
+    grid-template-columns: repeat(2, 1fr); /* Two per row on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .home-page {
+    padding: 1.5rem 1rem;
+  }
+  .page-title {
+    font-size: 1.6rem;
+  }
+  .module-cards-grid,
+  .stats-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .module-card {
+    padding: 1.6rem;
+    min-height: 200px;
+  }
+  .continue-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .continue-btn {
+    margin: 0.5rem auto 0;
+  }
+  .module-cards-grid,
+  .stats-cards-grid,
+  .continue-learning-section {
+    padding: 0 1rem;
+  }
+}
+
+/* Welcome Banner Icon & Text Enhancement */
+.welcome-icon {
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+.welcome-text strong {
+  color: #111827;
+  font-weight: 700;
+}
+
+/* Subtle fade-in for nicer appearance */
+.welcome-banner {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

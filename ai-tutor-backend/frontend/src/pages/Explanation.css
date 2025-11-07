@@ -1,0 +1,498 @@
+/* =======================================
+   AI Tutor - Explanation Page Styling
+   ======================================= */
+
+.explanation-page {
+  padding: 2rem 1rem;
+  margin: 0;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 100%;
+}
+
+/* ================================
+   Module Header
+   ================================ */
+.module-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.module-header .module-icon {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.module-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0.5rem 0;
+}
+
+.module-header .subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* ================================
+   Explanation Card
+   ================================ */
+.explanation-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.explanation-card:hover {
+  box-shadow: 0 6px 20px rgb(0, 0, 0);
+  transform: translateY(-2px);
+}
+
+/* ================================
+   Input Groups
+   ================================ */
+.input-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  opacity: 1; 
+}
+
+/* Text Inputs & Selects */
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-size: 1rem;
+  color: #000000; /* dark text for readability */
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-group input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #0d6efd;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+/* Force select text visibility in all browsers */
+.input-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-size: 1rem;
+  color: #111827; /* Always dark text */
+  transition: all 0.2s ease;
+  outline: none;
+
+  /* Custom dropdown arrow */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath d='M7 10l5 5 5-5z' fill='%236c757d'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
+}
+
+/* When focused */
+.input-group select:focus {
+  border-color: #0d6efd;
+  background-color: #ffffff;
+  color: #111827; /* Stay visible even on white bg */
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+/* Dropdown options */
+.input-group select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+/* Hover + active fixes (for Safari/Chrome rendering) */
+.input-group select:hover {
+  border-color: #adb5bd;
+}
+
+.input-group select:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Hover & focus transition */
+.input-group input:hover,
+.input-group select:hover {
+  border-color: #25588a;
+}
+
+/* Disabled states */
+.input-group input:disabled,
+.input-group select:disabled {
+  background-color: #c5ccd3;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* ================================
+   Get Explanation Button
+   ================================ */
+.get-explanation-btn {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background-color: #0d1117;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.get-explanation-btn:hover:not(:disabled) {
+  background-color: #161b22;
+  transform: translateY(-1px);
+}
+
+.get-explanation-btn:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.get-explanation-btn.loading {
+  background-color: #495057;
+  cursor: wait;
+}
+
+/* ================================
+   Feedback Messages
+   ================================ */
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  color: #198754;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* ================================
+   Explanation Result
+   ================================ */
+.explanation-result {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.explanation-result h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.explanation-content p {
+  line-height: 1.6;
+  color: #495057;
+  font-size: 1rem;
+}
+
+/* ================================
+   Recent Topics Section
+   ================================ */
+.recent-topics-section {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title span {
+  font-size: 1.1rem;
+}
+
+/* ================================
+   Recent Topics Grid - 4 items per row
+   ================================ */
+.recent-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* ================================
+   Topic Card - Similar to module cards
+   ================================ */
+.topic-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Difficulty Level Badges */
+.level-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  align-self: flex-start;
+}
+
+.level-badge.beginner {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.level-badge.intermediate {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.level-badge.advanced {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+/* Topic Preview */
+.topic-preview {
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.5;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+/* View More indicator */
+.topic-card::after {
+  content: "→";
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 1.2rem;
+  color: #6c757d;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.topic-card:hover::after {
+  opacity: 1;
+}
+
+/* ================================
+   Responsive Design
+   ================================ */
+@media (max-width: 1200px) {
+  .recent-topics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .explanation-page {
+    padding: 2rem 1rem;
+  }
+  
+  .recent-topics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .topic-card {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .explanation-page {
+    padding: 1rem;
+  }
+
+  .module-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .explanation-card {
+    padding: 1.5rem;
+  }
+
+  .input-group input,
+  .input-group select {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+    color: #000a14;
+  }
+
+  .get-explanation-btn {
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .recent-topics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-card {
+    padding: 1.2rem;
+    min-height: 160px;
+  }
+
+  .card-header h3 {
+    font-size: 1rem;
+  }
+  
+  .topic-card::after {
+    font-size: 1rem;
+  }
+}
+
+/* Input Group */
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+/* Select Wrapper (for custom arrow) */
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6c757d;
+  font-size: 0.7rem;
+  /* Optional: use an icon instead */
+  /* content: "⌄"; */
+}
+
+/* Hide default arrow and style select */
+#level-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  padding-right: 2.5rem; /* Make room for custom arrow */
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #f8f9fa;
+  color: #212529;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  outline: none;
+}
+
+#level-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+
+/* Optional: Style disabled state */
+#level-select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
