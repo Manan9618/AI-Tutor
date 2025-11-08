@@ -1,3 +1,4 @@
+// src/pages/LearningPath.jsx
 import React, { useEffect, useState } from "react";
 import { getLearnerProfile, updateLearnerProfile, getLearnerProgress } from "../api/api";
 

@@ -13,7 +13,7 @@ class OrchestratorAgent(BaseAgent):
     Manages session flow across multiple agents.
     """
 
-    def __init__(self, agents_dict: dict, model_name: str = "mistral"):
+    def __init__(self, agents_dict: dict, model_name: str = "gemini-2.5-pro"):
         super().__init__(model_name=model_name)
         self.agents = agents_dict
         self.session_state = {}

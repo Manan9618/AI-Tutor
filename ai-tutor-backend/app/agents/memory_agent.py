@@ -1,14 +1,13 @@
 # app/agents/memory_agent.py
 from .base_agent import BaseAgent
 
-
 class MemoryAgent(BaseAgent):
     """
-    Stores and retrieves user learning profiles and performance + analytics data.
-    Uses a local Hugging Face LLM instead of OpenAI.
+    Stores and retrieves user learning profiles and analytics.
+    Now compatible with Gemini/Ollama BaseAgent interface.
     """
 
-    def __init__(self, model_name: str = "mistral"):
+    def __init__(self, model_name: str = "gemini-2.5-pro"):
         super().__init__(model_name=model_name)
         self.memory_store = {}
 
@@ -42,9 +41,7 @@ class MemoryAgent(BaseAgent):
         self.save_profile(user_id, profile)
 
     # ================= PERFORMANCE =================
-    def update_performance(
-        self, user_id: str, topic: str, score: float, mistakes=None, time_spent: float = 0
-    ):
+    def update_performance(self, user_id: str, topic: str, score: float, mistakes=None, time_spent: float = 0):
         profile = self.get_profile(user_id)
         profile["performance"][topic] = {
             "score": score,
@@ -55,8 +52,7 @@ class MemoryAgent(BaseAgent):
 
     # ================= LEARNING PATH =================
     def get_user_learning_path(self, user_id: str):
-        profile = self.get_profile(user_id)
-        return profile.get("learning_path", [])
+        return self.get_profile(user_id).get("learning_path", [])
 
     def save_learning_path(self, user_id: str, topics: list):
         profile = self.get_profile(user_id)

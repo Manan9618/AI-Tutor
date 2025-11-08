@@ -97,17 +97,15 @@ export const updateLearningPath = (pathData) =>
 
 // ================= ANALYTICS APIs =================
 
-// ✅ Returns overall analytics or message (root)
+// ✅ Get dashboard metrics (progress, stats, performance)
 export const getAnalytics = () => api.get("/api/analytics/dashboard");
 
-// ✅ Returns recommendations (personalized topics)
-export const getProgressStats = () => api.get("/api/analytics/recommendations");
+// ✅ Get personalized recommendations (separate endpoint)
+export const getRecommendations = () => api.get("/api/analytics/recommendations");
 
-// ✅ Optionally duplicate or synthesize more detailed metrics
-export const getPerformanceMetrics = async () => {
-  const res = await api.get("/api/analytics/dashboard");
-  return { data: res.data.performanceMetrics || res.data };
-};
+// ✅ For performance metrics, you can either:
+// Option 1: Use the dashboard endpoint (recommended)
+export const getPerformanceMetrics = () => api.get("/api/analytics/dashboard");
 
 // ✅ NEW: Update analytics progress
 export const updateAnalytics = (data) =>

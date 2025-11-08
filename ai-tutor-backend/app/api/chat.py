@@ -1,98 +1,4 @@
-# # app/api/chat.py
-# from fastapi import APIRouter, Depends, Body, HTTPException
-# from pydantic import BaseModel
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy import select
-
-# from app.api.auth import get_current_user
-# from app.api import chat_agent
-# from app.database.session import get_db
-# from app.models.interaction import InteractionLog
-
-# router = APIRouter()
-
-
-# class ChatRequest(BaseModel):
-#     query: str
-
-
-# class ChatResponse(BaseModel):
-#     response: str
-
-
-# @router.post("/message", response_model=ChatResponse)
-# async def chat_message(
-#     request: ChatRequest = Body(...),
-#     current_user: str = Depends(get_current_user),
-#     db: AsyncSession = Depends(get_db)
-# ):
-#     """
-#     Send a chat message from the learner; returns assistant response.
-#     Also logs the interaction in the database.
-#     """
-#     user_id = current_user["id"] if isinstance(current_user, dict) and "id" in current_user else current_user
-#     session_state = {"user_id": user_id}
-
-#     # Generate AI response
-#     response = chat_agent.respond(request.query, session_state)
-
-#     # Log interaction in DB
-#     log_entry = InteractionLog(
-#         user_id=user_id,
-#         session_id=None,
-#         type="chat",
-#         topic=None,
-#         user_input=request.query,
-#         agent_response=response,
-#         extra_data={}
-#     )
-
-#     db.add(log_entry)
-#     await db.commit()
-#     await db.refresh(log_entry)
-
-#     return {"response": response}
-
-
-# @router.get("/history")
-# async def get_chat_history(
-#     current_user: str = Depends(get_current_user),
-#     db: AsyncSession = Depends(get_db)
-# ):
-#     """
-#     Retrieve the last 20 chat messages for the current user.
-#     """
-#     user_id = current_user["id"] if isinstance(current_user, dict) and "id" in current_user else current_user
-
-#     try:
-#         result = await db.execute(
-#             select(InteractionLog)
-#             .where(InteractionLog.user_id == user_id)
-#             .where(InteractionLog.type == "chat")
-#             .order_by(InteractionLog.timestamp.desc())
-#             .limit(20)
-#         )
-#         chats = result.scalars().all()
-
-#         if not chats:
-#             return {"history": []}
-
-#         history = [
-#             {
-#                 "id": c.id,
-#                 "user_input": c.user_input,
-#                 "agent_response": c.agent_response,
-#                 "timestamp": c.timestamp.isoformat() if c.timestamp else None
-#             }
-#             for c in chats
-#         ]
-
-#         return {"history": history}
-
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Failed to load chat history: {str(e)}")
-
-
+#app/api/chat/py
 from fastapi import APIRouter, Depends, Body, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,7 +11,7 @@ from app.models.session import LearningSession  # ✅ Import this
 from datetime import datetime
 
 # ✅ Instantiate the agent ONCE
-chat_agent = ChatAgent(model_name="mistral")
+chat_agent = ChatAgent(model_name="gemini-2.5-pro")
 
 router = APIRouter()
 
