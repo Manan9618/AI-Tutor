@@ -61,7 +61,7 @@ DEFAULT_MODEL = "google/gemma-2b-it"
 print("🚀 Initializing agents...")
 
 # Memory agent doesn't need heavy LLM, so initialize it first
-memory_agent = MemoryAgent(model_name=DEFAULT_MODEL)
+memory_agent = MemoryAgent()
 
 # All other agents will share the same model
 explanation_agent = ExplanationAgent(content_repo={}, model_name=DEFAULT_MODEL)
