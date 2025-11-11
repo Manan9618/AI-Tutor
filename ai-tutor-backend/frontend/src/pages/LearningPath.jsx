@@ -144,7 +144,7 @@ const LearningPath = () => {
                     </div>
                     <div className="topic-content">
                       <h3 className="topic-title">
-                        {idx + 1}. {topic.name || topic}
+                          {topic.name || topic}
                       </h3>
                       {topic.description && (
                         <p className="topic-description">{topic.description}</p>

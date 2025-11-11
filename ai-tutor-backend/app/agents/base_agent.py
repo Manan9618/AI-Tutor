@@ -26,7 +26,7 @@ class BaseAgent:
     Automatically switches backend based on model name.
     """
 
-    def __init__(self, model_name: str = "gemini-2.5-pro"):
+    def __init__(self, model_name: str = "gemini-2.0-flash-lite"):
         self.model_name = model_name
         self.is_gemini = model_name.lower().startswith("gemini")
         self.ollama_url = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")

@@ -7,7 +7,7 @@ class QuizAgent(BaseAgent):
     Creates quizzes and evaluates performance.
     """
 
-    def __init__(self, question_bank: dict | None = None, model_name: str = "gemini-2.5-pro"):
+    def __init__(self, question_bank: dict | None = None, model_name: str = "gemini-2.0-flash-lite"):
         super().__init__(model_name=model_name)
         self.question_bank = question_bank or {
             "addition": ["What is {a} + {b}? | {answer}"],

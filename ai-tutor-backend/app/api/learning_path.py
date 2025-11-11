@@ -1,6 +1,6 @@
-# app/api/learning_path.py
 import asyncio
 import logging
+import re
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any
 from app.api.auth import get_current_user
@@ -65,7 +65,35 @@ async def get_roadmap(current_user: str = Depends(get_current_user)):
         if not roadmap or not isinstance(roadmap, list):
             roadmap = ["Introduction to AI", "Neural Networks", "Machine Learning Basics"]
 
-        topics = [{"id": i + 1, "name": t, "completed": False} for i, t in enumerate(roadmap)]
+        # 🧹 Clean topic names
+        def clean_topic_name(t: str) -> str:
+            """
+                Remove leading numbers, markdown headers, bullets, and extra whitespace.
+                 Handles patterns like:
+                - "1. Topic"
+                - "2) Topic"
+                - "- Topic"
+                - "### Topic"
+                - "**Topic**"
+            """
+            # Remove leading numbering/headers/bullets
+            t = re.sub(r'^\s*(?:\d+[\.\)]\s*|[-*]\s*|#{1,6}\s*)', '', t)
+    
+            # Remove trailing markdown bold/italic (e.g., **text**, *text*)
+            t = re.sub(r'\*{1,2}([^*]+)\*{1,2}', r'\1', t)
+    
+            # Remove extra whitespace
+            t = t.strip()
+    
+            #If empty after cleaning, use a fallback
+            if not t:
+                t = "Untitled Topic"
+        
+            return t
+
+        # Inside /roadmap endpoint
+        cleaned_topics = [clean_topic_name(t) for t in roadmap]
+        topics = [{"name": t, "completed": False} for t in cleaned_topics]
 
         # 3️⃣ Save for persistence
         await maybe_await(memory_agent.save_learning_path, current_user, topics)

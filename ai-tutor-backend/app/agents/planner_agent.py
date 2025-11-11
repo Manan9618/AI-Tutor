@@ -13,7 +13,7 @@ class PlannerAgent(BaseAgent):
     Works with both Gemini and Ollama embeddings.
     """
 
-    def __init__(self, model_name: str = "gemini-2.5-pro", knowledge_base_path: str = "knowledge/"):
+    def __init__(self, model_name: str = "gemini-2.0-flash-lite", knowledge_base_path: str = "knowledge/"):
         super().__init__(model_name=model_name)
         self.knowledge_base_path = knowledge_base_path
 
