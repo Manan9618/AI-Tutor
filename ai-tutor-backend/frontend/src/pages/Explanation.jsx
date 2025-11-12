@@ -205,7 +205,7 @@ const Explanation = () => {
             <span>⏱️</span> Recent Topics
           </h2>
           <div className="recent-topics-grid">
-            {history.slice(0, 8).map((item, idx) => (
+            {history.slice(0, window.innerWidth >= 1200 ? 9 : 8).map((item, idx) => (
               <div
                 key={item.id || idx}
                 className="topic-card"
