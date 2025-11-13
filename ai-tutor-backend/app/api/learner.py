@@ -1,17 +1,26 @@
-#app/api/learner.py
+# app/api/learner.py
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from typing import Dict, Optional, List, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
+import sqlite3
+from pathlib import Path
+
 logger = logging.getLogger(__name__)
 from app.agents.memory_agent import MemoryAgent
-
 from .auth import get_current_user
 
+# Initialize agent and router
 memory_agent = MemoryAgent()
-
 router = APIRouter()
+
+# Database path (adjust if your structure differs)
+DB_PATH = Path(__file__).parent.parent / "data" / "ai_tutor.db"
+
+def get_db_connection():
+    """Get SQLite connection"""
+    return sqlite3.connect(str(DB_PATH))
 
 
 # =============== REQUEST MODELS ===============
@@ -80,24 +89,79 @@ def get_mock_achievements() -> List[Dict[str, Any]]:
     ]
 
 
-# =============== ROUTES ===============
+# =============== NEW: PROFILE STATS ENDPOINT ===============
+@router.get("/profile-stats", response_model=Dict[str, Any])
+async def get_profile_stats(current_user: str = Depends(get_current_user)):
+    """
+    Get accurate study time and current streak from database.
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 1. Total study time (sum of completed sessions)
+        cursor.execute("""
+            SELECT COALESCE(SUM(duration_seconds), 0)
+            FROM study_sessions
+            WHERE user_id = ? AND end_time IS NOT NULL
+        """, (current_user,))
+        total_seconds = cursor.fetchone()[0] or 0
+
+        # 2. Current streak (consecutive login days ending today)
+        today = datetime.utcnow().date()
+        cursor.execute("""
+            SELECT login_date FROM user_logins
+            WHERE user_id = ?
+            ORDER BY login_date DESC
+        """, (current_user,))
+        
+        dates = []
+        for row in cursor.fetchall():
+            try:
+                dates.append(datetime.strptime(row[0], "%Y-%m-%d").date())
+            except (ValueError, TypeError):
+                continue  # Skip invalid dates
+
+        # Calculate streak
+        streak = 0
+        expected = today
+        for d in dates:
+            if d == expected:
+                streak += 1
+                expected -= timedelta(days=1)
+            elif d < expected:
+                break  # Gap found
+
+        conn.close()
+
+        return {
+            "total_study_time_seconds": total_seconds,
+            "current_streak_days": streak
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching profile stats for {current_user}: {e}")
+        # Fallback to 0 if DB error occurs
+        return {
+            "total_study_time_seconds": 0,
+            "current_streak_days": 0
+        }
+
+
+# =============== EXISTING ROUTES ===============
 @router.get("/profile", response_model=Dict[str, Any])
 async def get_profile(current_user: str = Depends(get_current_user)):
     """
     Retrieve the full learner profile with progress and achievements.
     """
     try:
-        # Safely get profile — may be None
         base_profile = memory_agent.get_profile(current_user)
         logger.info(f"Raw profile from memory_agent: {base_profile}")
 
         if base_profile is None:
-            # Create a fresh default profile
             base_profile = {}
 
-        # Now safely merge with defaults
         full_profile = {**get_default_profile(current_user), **base_profile}
-
         progress = memory_agent.get_progress(current_user) or get_mock_progress()
         achievements = get_mock_achievements()
 
@@ -131,6 +195,7 @@ async def update_profile(
 
         return {"message": "Profile updated successfully"}
     except Exception as e:
+        logger.error(f"Profile update error for {current_user}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
 
 

@@ -1,42 +1,58 @@
 # app/api/quiz.py
-from fastapi import APIRouter, Depends, Query, Body
+from fastapi import APIRouter, Depends, Query, Body, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 import sqlite3
-from datetime import datetime
+import logging
+from pathlib import Path
 
 from .auth import get_current_user
-from app.api import quiz_agent, memory_agent
+from app.agents.quiz_agent import quiz_agent
+from app.agents.memory_agent import memory_agent
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-# Database path (adjust if needed)
-DB_PATH = "app/data/ai_tutor.db"
+DB_PATH = Path(__file__).parent.parent.parent / "data" / "ai_tutor.db"
+
 
 class QuizQuestion(BaseModel):
     id: int
     question: str
+    options: Optional[Dict[str, str]] = None  # for MCQ
+    answer: str
+    type: str
+
 
 class QuizResponse(BaseModel):
+    quiz_id: int
+    topic: str
+    level: str
+    num_questions: int
     questions: List[QuizQuestion]
 
+
 class SubmitAnswers(BaseModel):
-    answers: Dict[int, str]  # question_id -> answer
+    answers: Dict[str, str]  # question_id -> answer (string keys)
+
 
 class QuizHistoryItem(BaseModel):
-    topic: str          # From quizzes.title
-    level: str          # From quizzes.level
-    score: int
-    total: int
-    date: str           # ISO formatted recorded_at
-    duration: str       # Human-readable time spent (e.g., "5 min")
+    quiz_id: int
+    topic: str
+    level: str
+    score: float
+    total_questions: int
+    correct_answers: int
+    date: str
+    duration: str
     attempts: int
 
+
 def get_db_connection():
-    """Get SQLite connection"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row  # Return rows as dict
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.row_factory = sqlite3.Row
     return conn
+
 
 @router.get("/generate", response_model=QuizResponse)
 async def generate_quiz(
@@ -44,16 +60,35 @@ async def generate_quiz(
     num_questions: int = Query(5, ge=1, le=10),
     current_user: str = Depends(get_current_user)
 ):
-    """
-    Generate a quiz for the topic. Only returns question id and question text (no answers).
-    """
-    profile = memory_agent.get_profile(current_user)
-    level = profile.get("level", "beginner")
-    quiz = quiz_agent.generate_quiz(topic, level, num_questions)
+    """Generate a quiz for the topic."""
+    try:
+        profile = memory_agent.get_profile(current_user)
+        level = profile.get("level", "beginner")
+        
+        # ✅ Generate MCQs
+        quiz = await quiz_agent.generate_quiz(topic, level, num_questions, mcq=True)
 
-    # Return only id and question to the client
-    questions = [{"id": q["id"], "question": q["question"]} for q in quiz]
-    return {"questions": questions}
+        # ✅ Return FULL structure expected by QuizResponse
+        return QuizResponse(
+            quiz_id=-1,  # Temporary ID (assigned on submit)
+            topic=topic,
+            level=level,
+            num_questions=len(quiz),
+            questions=[
+                QuizQuestion(
+                    id=q["id"],
+                    question=q["question"],
+                    options=q.get("options", {}),
+                    answer=q["answer"],
+                    type=q["type"]
+                )
+                for q in quiz
+            ]
+        )
+    except Exception as e:
+        logger.error(f"Quiz generation failed for user {current_user}, topic {topic}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate quiz")
+
 
 @router.post("/submit")
 async def submit_quiz(
@@ -61,121 +96,146 @@ async def submit_quiz(
     answers: SubmitAnswers = Body(...),
     current_user: str = Depends(get_current_user)
 ):
-    """
-    Submit answers for a quiz.
-    - Re-generates the quiz to score it.
-    - Saves performance record to database.
-    - Updates user profile.
-    Returns score and feedback.
-    """
-    profile = memory_agent.get_profile(current_user)
-    level = profile.get("level", "beginner")
-
-    # Re-generate the quiz with same number of questions
-    quiz = quiz_agent.generate_quiz(topic, level, len(answers.answers))
-    score, feedback = quiz_agent.score_quiz(quiz, answers.answers)
-
-    # Save to performance_records
+    """Submit answers for a quiz."""
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        profile = memory_agent.get_profile(current_user)
+        level = profile.get("level", "beginner")
+        num_questions = len(answers.answers)
 
-        # First, check if a quiz exists for this topic/level/num_questions
-        # If not, create one in quizzes table
-        cursor.execute("""
-            INSERT OR IGNORE INTO quizzes (topic_id, title, level, num_questions, created_at)
-            VALUES (?, ?, ?, ?, datetime('now'))
-        """, (topic, topic, level, len(answers.answers)))
+        # ✅ Generate quiz
+        quiz = await quiz_agent.generate_quiz(topic, level, num_questions)
+        score, feedback = await quiz_agent.score_quiz(quiz, answers.answers)
 
-        # Get the quiz_id
-        cursor.execute("SELECT id FROM quizzes WHERE title = ? AND level = ?", (topic, level))
-        quiz_row = cursor.fetchone()
-        if not quiz_row:
-            raise Exception("Failed to find or create quiz record")
-        quiz_id = quiz_row['id']
+        # ✅ Calculate correct answers — FIX: use answers.answers.get()
+        correct_count = sum(
+            1 for q in quiz 
+            if answers.answers.get(str(q["id"]), "").strip().upper() == q["answer"].upper()
+        )
 
-        # Insert performance record
-        cursor.execute("""
-            INSERT INTO performance_records (
-                user_id, quiz_id, score, total_questions, 
-                time_spent_seconds, attempts, mistakes, recorded_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
-        """, (
-            current_user,
-            quiz_id,
-            score,
-            len(answers.answers),
-            0,  # You can pass actual time if available
-            1,  # Assume 1 attempt for now
-            "{}"  # Empty JSON for mistakes
-        ))
+        # ✅ Save to DB
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
 
-        conn.commit()
-        conn.close()
+                cursor.execute("""
+                    INSERT OR IGNORE INTO quizzes (topic_id, title, level, num_questions, created_at)
+                    VALUES (?, ?, ?, ?, datetime('now'))
+                """, (topic, topic, level, num_questions))
+
+                cursor.execute("SELECT id FROM quizzes WHERE title = ? AND level = ? ORDER BY created_at DESC LIMIT 1", (topic, level))
+                quiz_row = cursor.fetchone()
+                if not quiz_row:
+                    raise Exception("Failed to retrieve quiz ID after insert")
+                quiz_id = quiz_row['id']
+
+                for q in quiz:
+                    cursor.execute("""
+                        INSERT INTO questions (
+                            quiz_id, text, type, correct_answer, explanation, points, hint
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        quiz_id,
+                        q["question"],
+                        q["type"],
+                        q["answer"],
+                        "",
+                        1,
+                        ""
+                    ))
+
+                cursor.execute("""
+                    INSERT INTO performance_records (
+                        user_id, topic, quiz_id, score, total_questions, 
+                        correct_answers, time_spent_seconds, attempts, mistakes, recorded_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                """, (
+                    current_user,
+                    topic,
+                    quiz_id,
+                    score,
+                    num_questions,
+                    correct_count,
+                    0,
+                    1,
+                    "{}",
+                ))
+                conn.commit()
+
+        except Exception as db_err:
+            logger.error(f"Failed to save quiz result to DB: {db_err}")
+
+        memory_agent.update_performance(current_user, topic, score)
+        new_level = quiz_agent.adjust_difficulty(level, score)
+        memory_agent.update_profile(current_user, "level", new_level)
+
+        return {
+            "score": round(score * 100, 2),
+            "feedback": feedback,
+            "quiz_id": quiz_id
+        }
 
     except Exception as e:
-        print(f"Error saving quiz result: {e}")
-        # Continue anyway — don't block user experience
+        logger.error(f"Quiz submission failed for user {current_user}, topic {topic}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process quiz submission")
 
-    # Update memory and adjust level
-    memory_agent.update_performance(current_user, topic, score)
-    new_level = quiz_agent.adjust_difficulty(level, score)
-    memory_agent.update_profile(current_user, "level", new_level)
 
-    return {"score": score, "feedback": feedback}
-
-@router.get("/history", response_model=List[QuizHistoryItem])
+@router.get("/history")
 async def get_quiz_history(
     current_user: str = Depends(get_current_user)
 ):
     """
-    Get quiz history for the current user (last 10 quizzes).
-    Joins performance_records with quizzes to get topic title and level.
+    Get quiz history for the current user.
+    Joins performance_records with quizzes and counts questions.
+    Returns { "quizzes": [...] } to match frontend expectation.
     """
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    p.id AS performance_id,
+                    p.user_id,
+                    p.topic,
+                    p.quiz_id,
+                    p.score,
+                    p.total_questions,
+                    p.correct_answers,
+                    p.time_spent_seconds,
+                    p.attempts,
+                    p.recorded_at,
+                    q.title AS quiz_title,
+                    q.level,
+                    q.num_questions AS quiz_num_questions
+                FROM performance_records p
+                JOIN quizzes q ON p.quiz_id = q.id
+                WHERE p.user_id = ?
+                ORDER BY p.recorded_at DESC
+                LIMIT 10
+            """, (current_user,))
 
-        cursor.execute("""
-            SELECT 
-                p.user_id,
-                p.quiz_id,
-                p.score,
-                p.total_questions,
-                p.time_spent_seconds,
-                p.attempts,
-                p.recorded_at,
-                q.title AS topic,
-                q.level
-            FROM performance_records p
-            JOIN quizzes q ON p.quiz_id = q.id
-            WHERE p.user_id = ?
-            ORDER BY p.recorded_at DESC
-            LIMIT 10
-        """, (current_user,))
-
-        rows = cursor.fetchall()
-        conn.close()
+            rows = cursor.fetchall()
 
         history = []
         for row in rows:
-            # Format duration
-            seconds = row['time_spent_seconds']
+            seconds = row['time_spent_seconds'] or 0
             minutes = int(seconds // 60)
             duration = f"{minutes} min" if minutes > 0 else "Less than 1 min"
 
-            history.append({
-                "topic": row['topic'],
-                "level": row['level'],
-                "score": row['score'],
-                "total": row['total_questions'],
-                "date": row['recorded_at'],  # Already ISO format from SQLite
-                "duration": duration,
-                "attempts": row['attempts']
-            })
+            history.append(QuizHistoryItem(
+                quiz_id=row['quiz_id'],
+                topic=row['topic'],
+                level=row['level'],
+                score=row['score'],
+                total_questions=row['total_questions'],
+                correct_answers=row['correct_answers'],
+                date=row['recorded_at'],
+                duration=duration,
+                attempts=row['attempts']
+            ))
 
-        return history
+        # ✅ WRAP in { "quizzes": [...] } — matches Home.jsx expectation
+        return {"quizzes": history}
 
     except Exception as e:
-        print(f"Error fetching quiz history: {e}")
-        return []  # Return empty list on error
+        logger.error(f"Failed to fetch quiz history for {current_user}: {e}")
+        return {"quizzes": []}

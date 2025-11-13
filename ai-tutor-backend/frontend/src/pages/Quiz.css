@@ -651,3 +651,75 @@
     gap: 0.5rem;
   }
 }
+
+/* Container for all options */
+.mcq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+
+/* Individual option label */
+.mcq-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+  transition: all 0.2s ease;
+}
+
+.mcq-option:hover {
+  background: #f0f0f0;
+  border-color: #bbb;
+}
+
+/* Radio button (hide default) */
+.mcq-option input[type="radio"] {
+  margin-right: 12px;
+  transform: scale(1.2);
+}
+
+/* Text of the option (letter + content) */
+.mcq-option span {
+  color: black; /* ✅ This makes text black */
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Optional: Style selected option */
+.mcq-option input[type="radio"]:checked + span {
+  color: #2563eb; /* Blue when selected (optional) */
+  font-weight: 600;
+}
+
+/* Optional: Hide default radio button circle and use custom style */
+.mcq-option input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #999;
+  border-radius: 50%;
+  margin-right: 12px;
+  display: grid;
+  place-content: center;
+}
+
+.mcq-option input[type="radio"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background: #2563eb;
+}
+
+.mcq-option input[type="radio"]:checked::before {
+  transform: scale(1);
+}

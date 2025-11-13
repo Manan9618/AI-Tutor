@@ -191,3 +191,5 @@ class MemoryAgent:
             "coursesCompleted": 3,
             "accuracy": int(profile["analytics"]["average_score"] * 100) if profile["analytics"]["average_score"] else 0,
         }
+    
+memory_agent = MemoryAgent()

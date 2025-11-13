@@ -306,6 +306,7 @@ body {
   text-align: center;
   border-radius: 16px;
   cursor: pointer;
+  margin: 10px;
   font-weight: 600;
   transition: all 0.2s ease;
   background: transparent;

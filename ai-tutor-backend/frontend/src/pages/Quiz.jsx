@@ -212,13 +212,20 @@ const Quiz = () => {
               <p>
                 <strong>{idx + 1}. {q.question}</strong>
               </p>
-              <input
-                type="text"
-                placeholder="Type your answer..."
-                value={answers[q.id] || ""}
-                onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                className="answer-input"
-              />
+              {/* ✅ MCQ options with radio buttons */}
+              <div className="mcq-options">
+                {Object.entries(q.options).map(([letter, option]) => (
+                  <label key={letter} className="mcq-option">
+                    <input
+                      type="radio"
+                      name={`question-${q.id}`}
+                      value={letter}
+                      onChange={(e) => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                    />
+                    <span>{letter}) {option}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           ))}
 
@@ -241,7 +248,7 @@ const Quiz = () => {
               {results.score}/{results.total || 10}
             </span>
             <span className={`score-percentage ${results.score >= 70 ? 'good' : 'needs-improvement'}`}>
-              {results.score}% 
+              {results.score}%
             </span>
           </div>
 

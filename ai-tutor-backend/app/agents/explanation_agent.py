@@ -17,7 +17,7 @@ class ExplanationAgent(BaseAgent):
     def __init__(
         self,
         content_repo=None,
-        model_name: str = "gemini-2.0-flash-lite",
+        model_name: str = "gemini-2.0-flash",
         knowledge_base_path: str = "knowledge/",
         embedding_model: str = "nomic-embed-text",
     ):

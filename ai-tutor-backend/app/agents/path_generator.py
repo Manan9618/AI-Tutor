@@ -11,7 +11,7 @@ class PathGeneratorAgent(BaseAgent):
     Auto-switches between Ollama and Gemini.
     """
 
-    def __init__(self, topics_graph: dict | None = None, model_name: str = "gemini-2.0-flash-lite"):
+    def __init__(self, topics_graph: dict | None = None, model_name: str = "gemini-2.0-flash"):
         super().__init__(model_name=model_name)
         self.topics_graph = topics_graph or {
             "addition": {"prereq": [], "difficulty": 1},

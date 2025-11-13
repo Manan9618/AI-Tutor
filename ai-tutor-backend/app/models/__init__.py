@@ -5,6 +5,8 @@ from .quiz import Quiz, Question, Choice
 from .session import LearningSession
 from .performance import PerformanceRecord
 from .interaction import InteractionLog
+from app.models.study_session import StudySession
+from app.models.user_login import UserLogin
 
 
 __all__ = [
@@ -14,4 +16,6 @@ __all__ = [
     "LearningSession",
     "PerformanceRecord",
     "InteractionLog",
+    "StudySession",
+    "UserLogin",
 ]

@@ -147,4 +147,7 @@ export const updateLearnerProfile = (profileData) =>
   api.put("/api/learner/profile", profileData);
 export const getLearnerProgress = () => api.get("/api/learner/progress");
 
+// ✅ NEW: Get profile stats (study time, streak)
+export const getProfileStats = () => api.get("/api/learner/profile-stats");
+
 export default api;
