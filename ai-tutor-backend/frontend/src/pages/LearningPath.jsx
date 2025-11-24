@@ -1,6 +1,6 @@
 // // src/pages/LearningPath.jsx
 // import React, { useState, useEffect } from "react";
-// import { getLearningPath, updateLearningPath } from "../api/api";
+// import { getLearningPath, updateLearningPath, updateAnalytics } from "../api/api";
 // import { useNavigate } from "react-router-dom";
 // import "./LearningPath.css";
 
@@ -18,8 +18,27 @@
 //     setIsLoading(true);
 //     try {
 //       const pathRes = await getLearningPath();
-//       const topicsData = pathRes.data?.topics || pathRes.data || [];
-//       setTopics(topicsData);
+//       let rawTopics = pathRes.data?.topics || pathRes.data || [];
+
+//       // ✅ Normalize: ensure every topic is an object with name, completed, etc.
+//       const normalized = rawTopics.map((t, idx) => {
+//         if (typeof t === 'string') {
+//           return {
+//             id: idx,
+//             name: t,
+//             completed: false,
+//             description: '',
+//           };
+//         }
+//         return {
+//           id: t.id ?? idx,
+//           name: t.name ?? t.topic ?? t,
+//           completed: t.completed ?? false,
+//           description: t.description || '',
+//         };
+//       });
+
+//       setTopics(normalized);
 //     } catch (err) {
 //       console.error("Learning path error:", err);
 //       if (err.response?.status === 401) {
@@ -35,35 +54,32 @@
 //   };
 
 //   const handleTopicClick = (topic) => {
-//     navigate("/explanation", { state: { topic: topic.name } });
+//     // Navigate with query param so Explanation can auto-load
+//     navigate(`/explanation?topic=${encodeURIComponent(topic.name)}`);
 //   };
 
-//   const markAsCompleted = async (topicId) => {
+//   const markAsCompleted = async (topicId, topicName) => {
 //     try {
-//       const updatedTopics = topics.map(t =>
+//       const updatedTopics = topics.map((t) =>
 //         t.id === topicId ? { ...t, completed: true } : t
 //       );
 //       setTopics(updatedTopics);
 //       await updateLearningPath({ topics: updatedTopics });
 
+//       // ✅ Also update analytics for unified tracking
 //       try {
-//         await fetch("/api/analytics/update", {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//             "Authorization": `Bearer ${localStorage.getItem("authToken")}`
-//           },
-//           body: JSON.stringify({
-//             type: "topic_completed",
-//             topic_id: topicId
-//           })
+//         await updateAnalytics({
+//           type: "topic_completed",
+//           topic: topicName,
 //         });
-//       } catch (err) {
-//         console.warn("Failed to log completion to analytics:", err);
+//       } catch (analyticsErr) {
+//         console.warn("Analytics update failed:", analyticsErr);
 //       }
 //     } catch (err) {
 //       console.error("Failed to update progress:", err);
 //       setError("Failed to update progress. Please try again.");
+//       // Revert optimistic UI update on error (optional)
+//       fetchData();
 //     }
 //   };
 
@@ -74,9 +90,9 @@
 //           <div className="page-header">
 //             <div className="header-icon">
 //               <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-//                 <rect width="48" height="48" rx="12" fill="#FFE5CC"/>
-//                 <path d="M24 14L16 19V24H32V19L24 14Z" fill="#FF6B00"/>
-//                 <path d="M16 24L24 29L32 24" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+//                 <rect width="48" height="48" rx="12" fill="#FFE5CC" />
+//                 <path d="M24 14L16 19V24H32V19L24 14Z" fill="#FF6B00" />
+//                 <path d="M16 24L24 29L32 24" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 //               </svg>
 //             </div>
 //             <div>
@@ -104,9 +120,9 @@
 //         <div className="page-header">
 //           <div className="header-icon">
 //             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-//               <rect width="48" height="48" rx="12" fill="#FFE5CC"/>
-//               <path d="M24 14L16 19V24H32V19L24 14Z" fill="#FF6B00"/>
-//               <path d="M16 24L24 29L32 24" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+//               <rect width="48" height="48" rx="12" fill="#FFE5CC" />
+//               <path d="M24 14L16 19V24H32V19L24 14Z" fill="#FF6B00" />
+//               <path d="M16 24L24 29L32 24" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 //             </svg>
 //           </div>
 //           <div>
@@ -120,8 +136,8 @@
 //         <div className="path-section">
 //           <h2 className="section-title">
 //             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-//               <path d="M4 19.5C4 18.837 4.26339 18.2011 4.73223 17.7322C5.20107 17.2634 5.83696 17 6.5 17H20" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-//               <path d="M6.5 2H20V22H6.5C5.83696 22 5.20107 21.7366 4.73223 21.2678C4.26339 20.7989 4 20.163 4 19.5V4.5C4 3.83696 4.26339 3.20107 4.73223 2.73223C5.20107 2.26339 5.83696 2 6.5 2Z" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+//               <path d="M4 19.5C4 18.837 4.26339 18.2011 4.73223 17.7322C5.20107 17.2634 5.83696 17 6.5 17H20" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+//               <path d="M6.5 2H20V22H6.5C5.83696 22 5.20107 21.7366 4.73223 21.2678C4.26339 20.7989 4 20.163 4 19.5V4.5C4 3.83696 4.26339 3.20107 4.73223 2.73223C5.20107 2.26339 5.83696 2 6.5 2Z" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 //             </svg>
 //             Your Current Path
 //           </h2>
@@ -133,8 +149,8 @@
 //           ) : (
 //             <div className="topics-list">
 //               {topics.map((topic, idx) => (
-//                 <div 
-//                   key={topic.id || idx} 
+//                 <div
+//                   key={topic.id || idx}
 //                   className={`topic-item ${topic.completed ? 'completed' : ''}`}
 //                   onClick={() => handleTopicClick(topic)}
 //                 >
@@ -144,28 +160,28 @@
 //                     </div>
 //                     <div className="topic-content">
 //                       <h3 className="topic-title">
-//                           {topic.name || topic}
+//                         {topic.name}
 //                       </h3>
 //                       {topic.description && (
 //                         <p className="topic-description">{topic.description}</p>
 //                       )}
 //                     </div>
 //                   </div>
-//                   <button 
+//                   <button
 //                     onClick={(e) => {
 //                       e.stopPropagation();
-//                       markAsCompleted(topic.id || idx);
+//                       markAsCompleted(topic.id, topic.name);
 //                     }}
 //                     className={`complete-btn ${topic.completed ? 'completed' : ''}`}
 //                     disabled={topic.completed}
 //                   >
 //                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-//                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+//                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
 //                       {topic.completed && (
-//                         <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+//                         <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 //                       )}
 //                     </svg>
-//                     Mark Complete
+//                     {topic.completed ? "Completed" : "Mark Complete"}
 //                   </button>
 //                 </div>
 //               ))}
@@ -177,8 +193,8 @@
 //           <div className="progress-section">
 //             <h2 className="section-title">
 //               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-//                 <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-//                 <path d="M22 4L12 14.01L9 11.01" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+//                 <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+//                 <path d="M22 4L12 14.01L9 11.01" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 //               </svg>
 //               Progress Summary
 //             </h2>
@@ -201,8 +217,8 @@
 //             <div className="overall-progress">
 //               <h3>Overall Progress</h3>
 //               <div className="progress-bar-container">
-//                 <div 
-//                   className="progress-bar-fill" 
+//                 <div
+//                   className="progress-bar-fill"
 //                   style={{ width: `${progressPercentage}%` }}
 //                 ></div>
 //               </div>
@@ -227,10 +243,30 @@ import { useNavigate } from "react-router-dom";
 import "./LearningPath.css";
 
 const LearningPath = () => {
-  const [topics, setTopics] = useState([]);
+  const [roadmap, setRoadmap] = useState([]);
+  const [expandedSection, setExpandedSection] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [specializationInput, setSpecializationInput] = useState("");
   const navigate = useNavigate();
+
+  // Compute progress: skip "Choose Your Specialization" section
+  const computeProgress = (map) => {
+    if (!Array.isArray(map)) return { totalTopics: 0, completedCount: 0, progressPercentage: 0 };
+
+    let total = 0;
+    let completed = 0;
+
+    map.forEach(section => {
+      if (section.name === "🎯 Choose Your Specialization") return;
+      const topics = Array.isArray(section?.topics) ? section.topics : [];
+      total += topics.length;
+      completed += topics.filter(t => t?.completed).length;
+    });
+
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { totalTopics: total, completedCount: completed, progressPercentage: percentage };
+  };
 
   useEffect(() => {
     fetchData();
@@ -239,71 +275,90 @@ const LearningPath = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const pathRes = await getLearningPath();
-      let rawTopics = pathRes.data?.topics || pathRes.data || [];
+      const res = await getLearningPath();
+      const rawRoadmap = res.data?.roadmap || [];
 
-      // ✅ Normalize: ensure every topic is an object with name, completed, etc.
-      const normalized = rawTopics.map((t, idx) => {
-        if (typeof t === 'string') {
-          return {
-            id: idx,
-            name: t,
-            completed: false,
-            description: '',
-          };
+      const normalized = rawRoadmap.map((section, sIdx) => {
+        let topics = [];
+        if (Array.isArray(section.topics)) {
+          topics = section.topics.map((t, tIdx) => {
+            if (typeof t === "string") {
+              return {
+                id: `${sIdx}-${tIdx}`,
+                name: t,
+                completed: false,
+                description: "",
+              };
+            }
+            return {
+              id: t.id ?? `${sIdx}-${tIdx}`,
+              name: t.name ?? t.topic ?? t,
+              completed: t.completed ?? false,
+              description: t.description || "",
+            };
+          });
+        } else {
+          topics = [{ id: sIdx, name: section.name || section, completed: false }];
         }
+
         return {
-          id: t.id ?? idx,
-          name: t.name ?? t.topic ?? t,
-          completed: t.completed ?? false,
-          description: t.description || '',
+          name: section.name || `Section ${sIdx + 1}`,
+          topics,
         };
       });
 
-      setTopics(normalized);
+      setRoadmap(normalized);
+      setError("");
     } catch (err) {
       console.error("Learning path error:", err);
-      if (err.response?.status === 401) {
-        setError("Authentication required. Please log in again.");
-      } else if (err.response?.status === 404) {
-        setError("Learning path endpoint not found. Please check your backend.");
-      } else {
-        setError(err.response?.data?.detail || "Failed to load learning path");
-      }
+      setError(err.response?.data?.detail || "Failed to load learning path");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleTopicClick = (topic) => {
-    // Navigate with query param so Explanation can auto-load
-    navigate(`/explanation?topic=${encodeURIComponent(topic.name)}`);
-  };
-
-  const markAsCompleted = async (topicId, topicName) => {
+  const markAsCompleted = async (sectionIndex, topicId, topicName) => {
     try {
-      const updatedTopics = topics.map((t) =>
-        t.id === topicId ? { ...t, completed: true } : t
-      );
-      setTopics(updatedTopics);
-      await updateLearningPath({ topics: updatedTopics });
+      const updated = [...roadmap];
+      const topic = updated[sectionIndex].topics.find(t => t.id === topicId);
+      if (topic && !topic.completed) {
+        topic.completed = true;
+        setRoadmap(updated);
+        await updateLearningPath({ roadmap: updated });
 
-      // ✅ Also update analytics for unified tracking
-      try {
         await updateAnalytics({
           type: "topic_completed",
           topic: topicName,
         });
-      } catch (analyticsErr) {
-        console.warn("Analytics update failed:", analyticsErr);
       }
     } catch (err) {
       console.error("Failed to update progress:", err);
-      setError("Failed to update progress. Please try again.");
-      // Revert optimistic UI update on error (optional)
+      setError("Failed to save progress. Reverting...");
       fetchData();
     }
   };
+
+  const handleGenerateSpecialization = async () => {
+    if (!specializationInput.trim()) return;
+
+    const newSection = {
+      name: `🚀 ${specializationInput}`,
+      topics: [
+        { name: `Introduction to ${specializationInput}`, completed: false },
+        { name: `Core Concepts in ${specializationInput}`, completed: false },
+        { name: `Hands-on Projects with ${specializationInput}`, completed: false },
+        { name: `Advanced Topics in ${specializationInput}`, completed: false },
+        { name: `Industry Applications of ${specializationInput}`, completed: false }
+      ]
+    };
+
+    const updatedRoadmap = [...roadmap, newSection];
+    setRoadmap(updatedRoadmap);
+    await updateLearningPath({ roadmap: updatedRoadmap });
+    setSpecializationInput("");
+  };
+
+  const { totalTopics, completedCount, progressPercentage } = computeProgress(roadmap);
 
   if (isLoading) {
     return (
@@ -319,22 +374,17 @@ const LearningPath = () => {
             </div>
             <div>
               <h1>Learning Path</h1>
-              <p className="subtitle">Track your progress and plan your learning journey</p>
+              <p className="subtitle">Your personalized Computer Engineering journey</p>
             </div>
           </div>
-
           <div className="loading-state">
             <div className="spinner"></div>
-            <p>Loading your learning path...</p>
+            <p>Building your roadmap...</p>
           </div>
         </div>
       </div>
     );
   }
-
-  const completedCount = topics.filter(t => t.completed).length;
-  const totalTopics = topics.length;
-  const progressPercentage = totalTopics > 0 ? Math.round((completedCount / totalTopics) * 100) : 0;
 
   return (
     <div className="learning-path-container">
@@ -349,69 +399,113 @@ const LearningPath = () => {
           </div>
           <div>
             <h1>Learning Path</h1>
-            <p className="subtitle">Track your progress and plan your learning journey</p>
+            <p className="subtitle">Master Computer Engineering — from core to cutting-edge</p>
           </div>
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
+        {/* ROADMAP */}
         <div className="path-section">
-          <h2 className="section-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 19.5C4 18.837 4.26339 18.2011 4.73223 17.7322C5.20107 17.2634 5.83696 17 6.5 17H20" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M6.5 2H20V22H6.5C5.83696 22 5.20107 21.7366 4.73223 21.2678C4.26339 20.7989 4 20.163 4 19.5V4.5C4 3.83696 4.26339 3.20107 4.73223 2.73223C5.20107 2.26339 5.83696 2 6.5 2Z" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Your Current Path
-          </h2>
-
-          {topics.length === 0 ? (
-            <div className="empty-state">
-              <p>No topics in your learning path yet.</p>
-            </div>
+          <h2 className="section-title">Your Learning Journey</h2>
+          {roadmap.length === 0 ? (
+            <div className="empty-state">No learning path available.</div>
           ) : (
-            <div className="topics-list">
-              {topics.map((topic, idx) => (
-                <div
-                  key={topic.id || idx}
-                  className={`topic-item ${topic.completed ? 'completed' : ''}`}
-                  onClick={() => handleTopicClick(topic)}
-                >
-                  <div className="topic-left">
-                    <div className="topic-number-circle">
-                      {idx + 1}
-                    </div>
-                    <div className="topic-content">
-                      <h3 className="topic-title">
-                        {topic.name}
-                      </h3>
-                      {topic.description && (
-                        <p className="topic-description">{topic.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      markAsCompleted(topic.id, topic.name);
+            <div className="roadmap-container">
+              {roadmap.map((section, sIdx) => (
+                <div key={sIdx} className="big-topic-section">
+                  <div
+                    className={`big-topic-header ${section.name.startsWith('📚') || section.name === "🎯 Choose Your Specialization"
+                      ? 'core-specialization'
+                      : 'clickable'
+                      }`}
+                    onClick={() => {
+                      if (
+                        section.name !== "🎯 Choose Your Specialization" &&
+                        !section.name.startsWith('🚀')
+                      ) {
+                        setExpandedSection(expandedSection === sIdx ? null : sIdx);
+                      }
                     }}
-                    className={`complete-btn ${topic.completed ? 'completed' : ''}`}
-                    disabled={topic.completed}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                      {topic.completed && (
-                        <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      )}
-                    </svg>
-                    {topic.completed ? "Completed" : "Mark Complete"}
-                  </button>
+                    <h3>{section.name}</h3>
+                    {!section.name.startsWith('🎯') && (
+                      <span className="expand-icon">
+                        {expandedSection === sIdx ? '▲' : '▼'}
+                      </span>
+                    )}
+                  </div>
+
+                  {section.name === "🎯 Choose Your Specialization" ? (
+                    <div className="specialization-input-wrapper">
+                      <input
+                        type="text"
+                        placeholder="Enter a topic (e.g., Transformers, Neural Networks)..."
+                        value={specializationInput}
+                        onChange={(e) => setSpecializationInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && specializationInput.trim()) {
+                            handleGenerateSpecialization();
+                          }
+                        }}
+                        className="specialization-input-field"
+                      />
+                      {/* ✅ ALWAYS VISIBLE BUTTON */}
+                      <button
+                        className="generate-path-btn"
+                        onClick={handleGenerateSpecialization}
+                        disabled={!specializationInput.trim()}
+                      >
+                        Generate Path
+                      </button>
+                    </div>
+                  ) : (
+                    (expandedSection === sIdx || section.name.startsWith('🚀')) && (
+                      <div className="subtopics-list">
+                        {section.topics.map((topic, tIdx) => (
+                          <div
+                            key={topic.id}
+                            className={`topic-item ${topic.completed ? 'completed' : ''}`}
+                            onClick={async () => {
+                              // ✅ Auto-mark as completed + navigate
+                              if (!topic.completed) {
+                                await markAsCompleted(sIdx, topic.id, topic.name);
+                              }
+                              navigate(`/explanation?topic=${encodeURIComponent(topic.name)}`);
+                            }}
+                          >
+                            <div className="topic-left">
+                              <div className="topic-number-circle">{tIdx + 1}</div>
+                              <div className="topic-content">
+                                <h3 className="topic-title">{topic.name}</h3>
+                                {topic.description && (
+                                  <p className="topic-description">{topic.description}</p>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsCompleted(sIdx, topic.id, topic.name);
+                              }}
+                              className={`complete-btn ${topic.completed ? 'completed' : ''}`}
+                              disabled={topic.completed}
+                            >
+                              {topic.completed ? 'Completed' : 'Mark Complete'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {topics.length > 0 && (
+        {/* PROGRESS SUMMARY */}
+        {roadmap.length > 0 && (
           <div className="progress-section">
             <h2 className="section-title">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
